@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClientesAPITest
 {
-    public class RepositoryBaseTests
+    public class RepositoryBaseTests : IDisposable
     {
         private readonly DbContextOptions<ClientContext> _dbClientContextOptions;
 
@@ -13,31 +13,37 @@ namespace ClientesAPITest
 
         public RepositoryBaseTests() 
         {
-            _dbClientContextOptions = new DbContextOptionsBuilder<ClientContext>()
-                .UseInMemoryDatabase(databaseName: "TestDb")
+            var options = new DbContextOptionsBuilder<ClientContext>()
+                .UseInMemoryDatabase(databaseName: $"TestDb")
                 .Options;
 
-            _context = new ClientContext(_dbClientContextOptions);
+            this._context = new ClientContext(options);
+            this._context.Database.EnsureCreated();
 
-            InitializeDatabase();
+            DbInitializerTest.Initialize(this._context);
+
         }
 
-        private void InitializeDatabase()
+        [Fact]
+        public async Task GetById_Client_ShouldReturn()
         {
-            _context.Database.EnsureDeleted();
-            _context.Database.EnsureCreated();
-            SeedDatabase().Wait();
+            var repository = new RepositoryBase<Client>(_context);
+
+            var result = await repository.GetByIdAsync<Client>(2);
+
+            Assert.NotNull(result);
+            Assert.Equal(2, result.ClientId);
+            Assert.Equal("Pierre", result.Name);
         }
 
-        private async Task SeedDatabase()
+        [Fact]
+        public async Task GetById_Client_ShouldntReturn()
         {
-            var clients = new List<Client>
-            {
-                new Client { ClientId = 1, Name = "Antonio", Surname = "Juarez", Gender = Domain.Enums.Gender.Man, Country = Domain.Enums.Country.Spain, Email = "test@test.com"}
-            };
+            var repository = new RepositoryBase<Client>(_context);
 
-            _context.Clients.AddRange(clients);
-            await _context.SaveChangesAsync();
+            var result = await repository.GetByIdAsync<Client>(5);
+
+            Assert.Null(result);
         }
 
         [Fact]
@@ -45,14 +51,20 @@ namespace ClientesAPITest
         {
             var repository = new RepositoryBase<Client>(_context);
 
-            var client = new Client { ClientId = 2, Name = "Eva", Surname = "Garcia", Gender = Domain.Enums.Gender.Woman, Country = Domain.Enums.Country.Spain, Email = "test2@test.com" };
+            var client = new Client { Name = "Eva", Surname = "Garcia", Gender = Domain.Enums.Gender.Woman, Country = Domain.Enums.Country.Spain, Email = "test2@test.com" };
 
             await repository.AddAsync(client);
-            var newClient = await _context.Clients.FindAsync(2);
+            var newClient = await _context.Clients.FindAsync(1);
 
             Assert.NotNull(newClient);
             Assert.Equal(client.Name, newClient.Name);
             Assert.Equal(client.Surname, newClient.Surname);
+        }
+
+        public void Dispose()
+        {
+            this._context.Database.EnsureDeleted();
+            _context.Dispose();
         }
     }
 }

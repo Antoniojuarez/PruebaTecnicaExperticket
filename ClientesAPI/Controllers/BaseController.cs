@@ -16,6 +16,23 @@ namespace ClientesAPI.Controllers
             _service = service;
         }
 
+        [HttpGet("{id}")]
+        public virtual async Task<ActionResult<OperationResult<TDto>>> GetById(int id)
+        {
+            var result = new OperationResult<TDto>();
+
+            var entity = await _service.GetByIdAsync(id);
+            
+            if (entity == null)
+            {
+                result.AddMessage($"{typeof(TDto).Name} not found");
+                return NotFound(result);
+            }
+
+            result.SetSuccessResponse(entity);
+            return Ok(result);
+        }
+
         [HttpPost]
         public virtual async Task<ActionResult<OperationResult<TDto>>> Create(TDto dto)
         {

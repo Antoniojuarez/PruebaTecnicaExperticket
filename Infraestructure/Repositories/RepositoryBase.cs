@@ -12,6 +12,11 @@ namespace Infraestructure.Repositories
             _context = context;
         }
 
+        public async Task<TEntity> GetByIdAsync<TEntity>(int id) where TEntity : class, IBase
+        {
+            return await _context.Set<TEntity>().FindAsync(id);
+        }
+
         public async Task AddAsync(TEntity entity)
         {
             await _context.Set<TEntity>().AddAsync(entity);
