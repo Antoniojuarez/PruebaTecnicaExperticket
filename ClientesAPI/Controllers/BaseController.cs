@@ -15,5 +15,14 @@ namespace ClientesAPI.Controllers
         {
             _service = service;
         }
+
+        [HttpPost]
+        public virtual async Task<ActionResult<OperationResult<TDto>>> Create(TDto dto)
+        {
+            var result = new OperationResult<TDto>();
+            var newEntity = await _service.CreateAsync(dto);
+            result.SetSuccessResponse(newEntity);
+            return CreatedAtAction("Create", new { id = newEntity.Id }, result);
+        }
     }
 }

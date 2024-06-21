@@ -14,6 +14,7 @@ builder.Services.AddDbContext<ClientContext>(options =>
 
 builder.Services.AddScoped(typeof(IRepositoryBase<>), typeof(RepositoryBase<>));
 builder.Services.AddScoped(typeof(IService<,>), typeof(Service<,>));
+builder.Services.AddScoped<IClientService, ClientService>();
 
 builder.Services.AddControllers().
     AddJsonOptions(options =>

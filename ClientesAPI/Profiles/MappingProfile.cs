@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using Application.Dtos;
+using AutoMapper;
+using Domain.Entities;
 
 namespace ClientesAPI.Profiles
 {
@@ -6,7 +8,8 @@ namespace ClientesAPI.Profiles
     {
         public MappingProfile() 
         {
-
+            CreateMap<ClientDto, Client>().ForMember(dest => dest.ClientId, opt => opt.MapFrom(src => src.Id));
+            CreateMap<Client, ClientDto>().ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ClientId));
         }
     }
 }
