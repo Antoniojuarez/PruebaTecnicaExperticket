@@ -16,6 +16,13 @@ namespace ClientesAPI.Controllers
             _service = service;
         }
 
+        [HttpGet]
+        public virtual async Task<ActionResult<IEnumerable<TDto>>> GetAll()
+        {
+            var entities = await _service.GetAllAsync();
+            return Ok(entities);
+        }
+
         [HttpGet("{id}")]
         public virtual async Task<ActionResult<OperationResult<TDto>>> GetById(int id)
         {
@@ -40,6 +47,47 @@ namespace ClientesAPI.Controllers
             var newEntity = await _service.CreateAsync(dto);
             result.SetSuccessResponse(newEntity);
             return CreatedAtAction("Create", new { id = newEntity.Id }, result);
+        }
+
+        [HttpPut("{id}")]
+        public virtual async Task<ActionResult<OperationResult<TDto>>> Update(int id, TDto dto)
+        {
+            var result = new OperationResult<TDto>();
+
+            if (id != dto.Id)
+            {
+                result.AddMessage($"Invalid {typeof(TDto).Name} ID.");
+                return BadRequest(result);
+            }
+
+            var updateEntity = await _service.UpdateAsync(dto);
+
+            if (updateEntity == null)
+            {
+                result.AddMessage($"{typeof(TDto).Name} not found.");
+                return NotFound(result);
+            }
+
+            result.SetSuccessResponse(updateEntity);
+            return Ok(result);
+        }
+
+        [HttpDelete("{id}")]
+        public virtual async Task<ActionResult<OperationResult<bool>>> Delete(int id)
+        {
+            var result = new OperationResult<bool>();
+
+            if (await _service.DeleteAsync(id))
+            {
+                result.SetSuccessResponse(true);
+            }
+            else
+            {
+                result.AddMessage($"{typeof(TDto).Name} not found.");
+                return NotFound(result);
+            }
+
+            return Ok(result);
         }
     }
 }

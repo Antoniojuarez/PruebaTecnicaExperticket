@@ -1,5 +1,6 @@
 using Application.Services.Implementations;
 using Application.Services.Interfaces;
+using Domain.Entities;
 using Domain.Repositories;
 using Infraestructure;
 using Infraestructure.Repositories;
@@ -37,6 +38,24 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ClientContext>();
+
+    if (!context.Clients.Any())
+    {
+        var clients = new[]
+        {
+                        new Client { Name = "Antonio", Surname = "Juarez", Gender = Domain.Enums.Gender.Man, Country = Domain.Enums.Country.Spain, Email = "test@test.com"},
+                        new Client { Name = "Pierre", Surname = "Dubois", Gender = Domain.Enums.Gender.Man, Country = Domain.Enums.Country.France, Email = "testFrance@test.com"}
+                    };
+
+        context.Clients.AddRange(clients);
+        context.SaveChanges();
+    }
+}
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
