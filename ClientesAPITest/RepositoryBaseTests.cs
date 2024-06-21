@@ -1,27 +1,18 @@
 ﻿using Domain.Entities;
 using Infraestructure;
 using Infraestructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace ClientesAPITest
 {
-    public class RepositoryBaseTests : IDisposable
+    public class RepositoryBaseTests : IClassFixture<DatabaseFixture>
     {
-        private readonly DbContextOptions<ClientContext> _dbClientContextOptions;
-
+        private readonly DatabaseFixture _fixture;
         private readonly ClientContext _context;
 
-        public RepositoryBaseTests() 
+        public RepositoryBaseTests(DatabaseFixture fixture)
         {
-            var options = new DbContextOptionsBuilder<ClientContext>()
-                .UseInMemoryDatabase(databaseName: $"TestDb")
-                .Options;
-
-            this._context = new ClientContext(options);
-            this._context.Database.EnsureCreated();
-
-            DbInitializerTest.Initialize(this._context);
-
+            _fixture = fixture;
+            _context = _fixture.Context;
         }
 
         [Fact]
@@ -54,17 +45,38 @@ namespace ClientesAPITest
             var client = new Client { Name = "Eva", Surname = "Garcia", Gender = Domain.Enums.Gender.Woman, Country = Domain.Enums.Country.Spain, Email = "test2@test.com" };
 
             await repository.AddAsync(client);
-            var newClient = await _context.Clients.FindAsync(1);
+            var newClient = await _context.Clients.FindAsync(3);
 
             Assert.NotNull(newClient);
             Assert.Equal(client.Name, newClient.Name);
             Assert.Equal(client.Surname, newClient.Surname);
         }
 
-        public void Dispose()
+        [Fact]
+        public async Task Updat_Client_ShouldUpdateEntity()
         {
-            this._context.Database.EnsureDeleted();
-            _context.Dispose();
+            var repository = new RepositoryBase<Client>(_context);
+
+            var result = await repository.GetByIdAsync<Client>(2);
+
+            result.Address = "Direccion Prueba";
+
+            await repository.UpdateAsync(result);
+
+            var updatedResult = await repository.GetByIdAsync<Client>(2);
+
+            Assert.NotNull(updatedResult);
+            Assert.Equal("Direccion Prueba", updatedResult.Address);
+        }
+
+        [Fact]
+        public async Task Delete_Client_ShouldDeleteEntity()
+        {
+            var repository = new RepositoryBase<Client>(_context);
+
+            var isDeleted = await repository.DeleteAsync(2);
+
+            Assert.True(isDeleted);
         }
     }
 }

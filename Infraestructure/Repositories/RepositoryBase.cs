@@ -29,6 +29,7 @@ namespace Infraestructure.Repositories
             await _context.SaveChangesAsync();
         }
 
+        // Falta mejora para no tener que pasar todos los parametros requeridos al actualizar
         public async Task UpdateAsync(TEntity objModel)
         {
             var entityType = _context.Model.FindEntityType(typeof(TEntity));
