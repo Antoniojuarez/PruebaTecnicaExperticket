@@ -1,6 +1,5 @@
 ﻿using Domain.Entities;
 using Infraestructure;
-using Microsoft.EntityFrameworkCore;
 
 namespace ClientesAPITest
 {
