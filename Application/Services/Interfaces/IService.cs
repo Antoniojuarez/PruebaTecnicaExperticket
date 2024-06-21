@@ -6,6 +6,7 @@ namespace Application.Services.Interfaces
         where TEntity : class, IBase
         where TDto : class
     {
+        Task<TDto> GetByIdAsync(int id);
         Task<TDto> CreateAsync(TDto dto);
     }
 }

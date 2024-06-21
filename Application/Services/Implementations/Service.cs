@@ -19,6 +19,12 @@ namespace Application.Services.Implementations
             _mapper = mapper;
         }
 
+        public async Task<TDto> GetByIdAsync(int id)
+        {
+            var entity = await _repository.GetByIdAsync<TEntity>(id);
+            return _mapper.Map<TDto>(entity);
+        }
+
         public async Task<TDto> CreateAsync(TDto dto)
         {
             ValidationUtils.AgainstNull(dto, nameof(dto));
