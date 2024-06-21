@@ -12,6 +12,12 @@ namespace Infraestructure.Repositories
             _context = context;
         }
 
+        public async Task AddAsync(TEntity entity)
+        {
+            await _context.Set<TEntity>().AddAsync(entity);
+            await _context.SaveChangesAsync();
+        }
+
         private bool _disposed = false;
 
         public void Dispose()

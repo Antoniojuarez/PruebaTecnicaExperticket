@@ -13,3 +13,5 @@
 /Domain/obj
 /Infraestructure/bin/Debug/net6.0
 /Infraestructure/obj
+/ClientesAPITest/bin/Debug/net6.0
+/ClientesAPITest/obj
